@@ -4,7 +4,6 @@ class Cell:
 
     def __init__(self, row, col, is_wall):
         
-
         self.row = row
         self.col = col
         self.is_wall = True
@@ -16,5 +15,6 @@ class Cell:
         self.y = self.height * (self.height + 1)
     
     def draw(self):
+        cv2.rectangle()
 
 
