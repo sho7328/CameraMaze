@@ -20,7 +20,6 @@ class Track_hand:
         # Load game elements
         self.score = 0
 
-
         # Create the hand detector
         base_options = BaseOptions(model_asset_path='data/hand_landmarker.task')
         options = HandLandmarkerOptions(base_options=base_options,
@@ -64,9 +63,8 @@ class Track_hand:
 
             # map the coordinates back to screen dimensions
             pixelCoord = DrawingUtil._normalized_to_pixel_coordinates(finger.x, finger.y, imageWidth, imageHeight)
-            
+        
             return pixelCoord
-            # cv2.circle(image, (pixelCoord[0], pixelCoord[1]), 25, GREEN, 5
             
     def run(self):
         """
@@ -95,15 +93,15 @@ class Track_hand:
             to_detect = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
             results = self.detector.detect(to_detect)
 
-
             # Draw the hand landmarks
             # self.draw_landmarks_on_hand(image, results)
             pixelCoord = self.get_finger_position(image, results)
 
-                # Draw background
+            # Draw background
             self.screen.blit(self.background, (0, 0))
 
-            pygame.draw.circle(self.background, (0, 255, 0), [pixelCoord[0], pixelCoord[1]], 15, 3)
+            if pixelCoord:
+                pygame.draw.circle(self.background, (0, 255, 0), [pixelCoord[0], pixelCoord[1]], 5, 10)
             
             # Draws the surface object to the screen.
             pygame.display.update()
@@ -113,14 +111,16 @@ class Track_hand:
             # cv2.imshow('Hand Tracking', image)
 
             # Break the loop if the user presses 'q'
-            if cv2.waitKey(50) & 0xFF == ord('q'):
+            if cv2.waitKey(1) & 0xFF == ord('q'):
                 print(self.score)
                 break
                 
         self.video.release()
         cv2.destroyAllWindows()
 
-
+if __name__ == "__main__":
+    t = Track_hand()
+    t.run()
 
 
 
