@@ -38,6 +38,33 @@ class Track_hand:
         self.background = pygame.transform.scale(self.background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
+    def draw_landmarks_on_hand(self, image, detection_result):
+        """
+        Draws all the landmarks on the hand
+        Args:
+            image (Image): Image to draw on
+            detection_result (HandLandmarkerResult): HandLandmarker detection results
+        """
+        # Get a list of the landmarks
+        hand_landmarks_list = detection_result.hand_landmarks
+        
+        # Loop through the detected hands to visualize.
+        for idx in range(len(hand_landmarks_list)):
+            hand_landmarks = hand_landmarks_list[idx]
+
+            # Save the landmarks into a NormalizedLandmarkList
+            hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
+            hand_landmarks_proto.landmark.extend([
+            landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in hand_landmarks
+            ])
+
+            # Draw the landmarks on the hand
+            DrawingUtil.draw_landmarks(image,
+                                       hand_landmarks_proto,
+                                       solutions.hands.HAND_CONNECTIONS,
+                                       solutions.drawing_styles.get_default_hand_landmarks_style(),
+                                       solutions.drawing_styles.get_default_hand_connections_style())
+
     def get_finger_position(self, image, detection_result):
         """
         Draws a green circle on the index finger 
@@ -93,6 +120,8 @@ class Track_hand:
             to_detect = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
             results = self.detector.detect(to_detect)
 
+            self.draw_landmarks_on_hand(image, results)
+
             # Draw the hand landmarks
             # self.draw_landmarks_on_hand(image, results)
             pixelCoord = self.get_finger_position(image, results)
@@ -107,11 +136,11 @@ class Track_hand:
             pygame.display.update()
 
             # Change the color of the frame back
-            # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            # cv2.imshow('Hand Tracking', image)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            cv2.imshow('Hand Tracking', image)
 
             # Break the loop if the user presses 'q'
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(10) & 0xFF == ord('q'):
                 print(self.score)
                 break
                 

@@ -9,24 +9,25 @@ BLUE = (0, 0, 255)
 
 class Cell:
 
-    def __init__(self, row, col, is_wall, surface):
-        
+    def __init__(self, row, col, screen=None, is_wall=False):
         self.row = row
         self.col = col
+        self.screen = screen
+        self.color = WHITE
         self.is_wall = is_wall
-        if self.is_wall:
-            self.color = RED
-        else:
-            self.color = WHITE
-
-        self.surface = surface
 
         # divided by however many cells there are
         self.width = SCREEN_WIDTH / 10
         self.height = SCREEN_HEIGHT / 8
 
         self.x = self.width * (self.row + 1)
+        # fix the Y
         self.y = self.height * (self.height + 1)
     
+    def set_wall(self, is_wall):
+        self.is_wall = is_wall
+        if self.is_wall:
+            self.color = RED
+
     def draw(self):
-        pygame.draw.rect(self.surface, self.color, pygame.Rect(self.x, self.y, self.width, self.height))
+        pygame.draw.rect(self.screen, self.color, pygame.Rect(self.x, self.y, self.width, self.height))
