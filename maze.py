@@ -40,7 +40,7 @@ class Maze:
                     line = lines[row + 1].strip()
                     for col in range(self.num_cols):
                         # Create a new MazeCell for each location
-                        self.maze_grid[row][col] = Cell(row, col, screen=self.screen)
+                        self.maze_grid[row][col] = Cell(row, col, self.num_rows, self.num_cols, screen=self.screen)
 
                         # Set if it is a wall or the start or end cell
                         if line[col] == '#':
@@ -56,20 +56,19 @@ class Maze:
             print(e)
 
     def draw(self):
-        pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(50, 50, 50, 50))
+        # pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(50, 50, 50, 50))
         for row in range(self.num_rows):
             for col in range(self.num_cols):
                 self.maze_grid[row][col].draw()
 
 if __name__ == "__main__":
-    maze = Maze(1)
+    maze = Maze(2)
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
         
-        # Draw background
         maze.draw()
 
         # pygame.draw.circle(background, (0, 255, 0), [SCREEN_WIDTH/2, SCREEN_HEIGHT/2], 15, 3)
