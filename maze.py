@@ -46,10 +46,11 @@ class Maze:
                         if line[col] == '#':
                             self.maze_grid[row][col].set_wall(True)
                         elif line[col] == 'A':
-                            # self.maze_grid[row][col].set_explored(True)
                             self.start_cell = self.maze_grid[row][col]
+                            self.maze_grid[row][col].set_is_start_cell(True)
                         elif line[col] == 'B':
                             self.end_cell = self.maze_grid[row][col]
+                            self.maze_grid[row][col].set_is_start_cell(True)
 
         except FileNotFoundError as e:
             print("An error occurred.")
