@@ -50,7 +50,7 @@ class Maze:
                             self.maze_grid[row][col].set_is_start_cell(True)
                         elif line[col] == 'B':
                             self.end_cell = self.maze_grid[row][col]
-                            self.maze_grid[row][col].set_is_start_cell(True)
+                            self.maze_grid[row][col].set_is_end_cell(True)
 
         except FileNotFoundError as e:
             print("An error occurred.")
