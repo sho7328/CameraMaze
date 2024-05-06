@@ -37,7 +37,7 @@ class Track_hand:
         self.background = pygame.image.load("background_image.png")
         self.background = pygame.transform.scale(self.background, (SCREEN_WIDTH, SCREEN_HEIGHT))
         self.player = pygame.image.load("player.png")
-        self.player = pygame.transform.scale(self.player, (5, 5))
+        self.player = pygame.transform.scale(self.player, (50, 50))
 
 
     def draw_landmarks_on_hand(self, image, detection_result):
@@ -122,7 +122,7 @@ class Track_hand:
             to_detect = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
             results = self.detector.detect(to_detect)
 
-            self.draw_landmarks_on_hand(image, results)
+            # self.draw_landmarks_on_hand(image, results)
 
             # Draw the hand landmarks
             # self.draw_landmarks_on_hand(image, results)
@@ -140,7 +140,7 @@ class Track_hand:
 
             # Change the color of the frame back
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            cv2.imshow('Hand Tracking', image)
+            # cv2.imshow('Hand Tracking', image)
 
             # Break the loop if the user presses 'q'
             if cv2.waitKey(10) & 0xFF == ord('q'):

@@ -57,7 +57,6 @@ class Maze:
             print(e)
 
     def draw(self):
-        # pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(50, 50, 50, 50))
         for row in range(self.num_rows):
             for col in range(self.num_cols):
                 self.maze_grid[row][col].draw()
