@@ -36,6 +36,8 @@ class Track_hand:
         # Load background image
         self.background = pygame.image.load("background_image.png")
         self.background = pygame.transform.scale(self.background, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.player = pygame.image.load("player.png")
+        self.player = pygame.transform.scale(self.player, (5, 5))
 
 
     def draw_landmarks_on_hand(self, image, detection_result):
@@ -130,7 +132,8 @@ class Track_hand:
             self.screen.blit(self.background, (0, 0))
 
             if pixelCoord:
-                pygame.draw.circle(self.background, (0, 255, 0), [pixelCoord[0], pixelCoord[1]], 5, 10)
+                self.screen.blit(self.player, (pixelCoord[0], pixelCoord[1]))
+                # pygame.draw.circle(self.background, (0, 255, 0), [pixelCoord[0], pixelCoord[1]], 5, 10)
             
             # Draws the surface object to the screen.
             pygame.display.update()
