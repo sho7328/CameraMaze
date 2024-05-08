@@ -16,6 +16,8 @@ DrawingUtil = mp.solutions.drawing_utils
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 800
 
+WHITE = (255, 255, 255)
+
 class Game:
     def __init__(self, level):
         # Create the hand detector
@@ -35,11 +37,13 @@ class Game:
         self.player = pygame.image.load("player.png")
         self.player = pygame.transform.scale(self.player, (50, 50))
 
+        self.font = pygame.font.Font(None, 36)
+
         # Load game elements
         self.level = level
         self.maze = Maze(self.level)
         self.score = 0
-
+        self.just_spawned = True
 
     def draw_landmarks_on_hand(self, image, detection_result):
         """
@@ -90,12 +94,37 @@ class Game:
             # get the coordinates of just teh index finger
             finger = hand_landmarks[HandLandmarkPoints.INDEX_FINGER_TIP.value]
 
-
             # map the coordinates back to screen dimensions
             pixelCoord = DrawingUtil._normalized_to_pixel_coordinates(finger.x, finger.y, imageWidth, imageHeight)
         
             return pixelCoord
             
+    def is_touching_wall(self, finger_x, finger_y):
+        # check if the x coordinates of the player
+        for row in range(len(self.maze.maze_grid)):
+            for col in range(len(self.maze.maze_grid[0])):
+                if self.maze.maze_grid[row][col].is_wall:
+                    if (self.maze.maze_grid[row][col].x < finger_x) and (finger_x < (self.maze.maze_grid[row][col].x + self.maze.maze_grid[row][col].width)) and (self.maze.maze_grid[row][col].y < finger_y) and (finger_y < (self.maze.maze_grid[row][col].y + self.maze.maze_grid[row][col].height)):
+                        return True
+        return False
+    
+    def is_touching_start_cell(self, finger_x, finger_y):
+        for row in range(len(self.maze.maze_grid)):
+            for col in range(len(self.maze.maze_grid[0])):
+                if self.maze.maze_grid[row][col].is_start_cell:
+                    if (self.maze.maze_grid[row][col].x < finger_x) and (finger_x < (self.maze.maze_grid[row][col].x + self.maze.maze_grid[row][col].width)) and ((self.maze.maze_grid[row][col].y < finger_y) and (finger_y < (self.maze.maze_grid[row][col].y + self.maze.maze_grid[row][col].height))):
+                        self.just_spawned = False
+                        return True
+        return False
+    
+    def is_touching_end_cell(self, finger_x, finger_y):
+        for row in range(len(self.maze.maze_grid)):
+            for col in range(len(self.maze.maze_grid[0])):
+                if self.maze.maze_grid[row][col].is_end_cell:
+                    if (self.maze.maze_grid[row][col].x < finger_x) and (finger_x < (self.maze.maze_grid[row][col].x + self.maze.maze_grid[row][col].width)) and ((self.maze.maze_grid[row][col].y < finger_y) and (finger_y < (self.maze.maze_grid[row][col].y + self.maze.maze_grid[row][col].height))):
+                        return True
+        return False
+
     def run(self):
         """
         Main game loop. Runs until the 
@@ -138,6 +167,18 @@ class Game:
                 self.screen.blit(self.player, (pixelCoord[0], pixelCoord[1]))
                 # pygame.draw.circle(self.background, (0, 255, 0), [pixelCoord[0], pixelCoord[1]], 5, 10)
             
+                while self.just_spawned and not self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
+                    text = self.font.render("Go to start cell", True, WHITE)
+                    self.screen.blit(text, (100, 100))
+
+                if self.is_touching_wall(pixelCoord[0], pixelCoord[1]):
+                    text = self.font.render("YOU DIED", True, WHITE)
+                    self.screen.blit(text, (100, 100))
+
+                if self.is_touching_end_cell(pixelCoord[0], pixelCoord[1]):
+                    text = self.font.render("YOU WIN!", True, WHITE)
+                    self.screen.blit(text, (100, 100))
+
             # Draws the surface object to the screen.
             pygame.display.update()
 
