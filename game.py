@@ -167,15 +167,15 @@ class Game:
                 self.screen.blit(self.player, (pixelCoord[0], pixelCoord[1]))
                 # pygame.draw.circle(self.background, (0, 255, 0), [pixelCoord[0], pixelCoord[1]], 5, 10)
             
-                while self.just_spawned and not self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
+                if self.just_spawned and not self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
                     text = self.font.render("Go to start cell", True, WHITE)
                     self.screen.blit(text, (100, 100))
 
-                if self.is_touching_wall(pixelCoord[0], pixelCoord[1]):
+                elif not self.just_spawned and self.is_touching_wall(pixelCoord[0], pixelCoord[1]):
                     text = self.font.render("YOU DIED", True, WHITE)
                     self.screen.blit(text, (100, 100))
 
-                if self.is_touching_end_cell(pixelCoord[0], pixelCoord[1]):
+                elif not self.just_spawned and self.is_touching_end_cell(pixelCoord[0], pixelCoord[1]):
                     text = self.font.render("YOU WIN!", True, WHITE)
                     self.screen.blit(text, (100, 100))
 
@@ -195,6 +195,6 @@ class Game:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    g = Game(1)
+    g = Game(2)
     g.run()
         
