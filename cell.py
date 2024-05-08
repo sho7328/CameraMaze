@@ -23,8 +23,6 @@ class Cell:
         self.width = SCREEN_WIDTH / self.num_cols
         self.height = SCREEN_HEIGHT / self.num_rows
 
-        self.start_image = pygame.image.load("start.png")
-        self.start_image = pygame.transform.scale(self.start_image, (self.width, self.height))
         self.end_image = pygame.image.load("end.png")
         self.end_image = pygame.transform.scale(self.end_image, (self.width, self.height))
         self.cell_image = pygame.image.load("cell.png")
@@ -48,12 +46,10 @@ class Cell:
 
     def draw(self):
         if self.is_start_cell:
-            # start cell image
-            self.screen.blit(self.start_image, (self.x, self.y))
+            self.screen.blit(self.cell_image, (self.x, self.y))
         elif self.is_end_cell:
             self.screen.blit(self.end_image, (self.x, self.y))
         elif self.is_wall:
             self.screen.blit(self.wall_image, (self.x, self.y))
-            # pygame.draw.rect(self.screen, (224, 85, 85), pygame.Rect(self.x, self.y, self.width, self.height))
         else:
             self.screen.blit(self.cell_image, (self.x, self.y))

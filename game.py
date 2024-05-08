@@ -4,6 +4,7 @@ from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 import pygame
 from maze import Maze
+import time
 
 # Library Constants
 BaseOptions = mp.tasks.BaseOptions
@@ -36,6 +37,8 @@ class Game:
         # Load images
         self.player = pygame.image.load("player.png")
         self.player = pygame.transform.scale(self.player, (50, 50))
+        self.background = pygame.image.load("wall.png")
+        self.background = pygame.transform.scale(self.background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
         self.font = pygame.font.Font(None, 36)
 
@@ -44,6 +47,13 @@ class Game:
         self.maze = Maze(self.level)
         self.score = 0
         self.just_spawned = True
+        self.s_cell = self.maze.return_start_cell()
+        self.died = False
+        self.won = False
+        self.start_time = None
+        self.timer_started = False
+        self.elapsed_time = 0
+        self.timer_font = pygame.font.Font(None, 36)
 
     def draw_landmarks_on_hand(self, image, detection_result):
         """
@@ -109,12 +119,9 @@ class Game:
         return False
     
     def is_touching_start_cell(self, finger_x, finger_y):
-        for row in range(len(self.maze.maze_grid)):
-            for col in range(len(self.maze.maze_grid[0])):
-                if self.maze.maze_grid[row][col].is_start_cell:
-                    if (self.maze.maze_grid[row][col].x < finger_x) and (finger_x < (self.maze.maze_grid[row][col].x + self.maze.maze_grid[row][col].width)) and ((self.maze.maze_grid[row][col].y < finger_y) and (finger_y < (self.maze.maze_grid[row][col].y + self.maze.maze_grid[row][col].height))):
-                        self.just_spawned = False
-                        return True
+        if (self.s_cell.x < finger_x) and (finger_x < (self.s_cell.x + self.s_cell.width)) and ((self.s_cell.y < finger_y) and (finger_y < (self.s_cell.y + self.s_cell.height))):
+            self.just_spawned = False
+            return True
         return False
     
     def is_touching_end_cell(self, finger_x, finger_y):
@@ -142,6 +149,7 @@ class Game:
             # Get the current frame
             frame = self.video.read()[1]
 
+            self.screen.blit(self.background, (0,0))
             self.maze.draw()
 
             # Convert it to an RGB image
@@ -155,28 +163,41 @@ class Game:
             results = self.detector.detect(to_detect)
 
             # self.draw_landmarks_on_hand(image, results)
+            
+            # Check if player touches start cell
+            if not self.timer_started and self.just_spawned == False:
+                self.start_time = time.time()  # Start the timer
+                self.timer_started = True
+
+            # Update timer if started
+            if self.timer_started:
+                current_time = time.time()
+                self.elapsed_time = int(current_time - self.start_time)
+                timer_text = self.timer_font.render(f"Time: {self.elapsed_time} s", True, WHITE)
+                self.screen.blit(timer_text, (10, 10))  # Display timer at (10, 10)
 
             # Draw the hand landmarks
             # self.draw_landmarks_on_hand(image, results)
             pixelCoord = self.get_finger_position(image, results)
-
-            # Draw background
-            # self.screen.blit(self.background, (0, 0))
 
             if pixelCoord:
                 self.screen.blit(self.player, (pixelCoord[0], pixelCoord[1]))
                 # pygame.draw.circle(self.background, (0, 255, 0), [pixelCoord[0], pixelCoord[1]], 5, 10)
             
                 if self.just_spawned and not self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
-                    text = self.font.render("Go to start cell", True, WHITE)
-                    self.screen.blit(text, (100, 100))
+                    text = self.font.render("Go to", True, WHITE)
+                    self.screen.blit(text, ((self.s_cell.x, self.s_cell.y - (self.s_cell.height/2))))
+                    text1 = self.font.render("start cell", True, WHITE)
+                    self.screen.blit(text1, ((self.s_cell.x, self.s_cell.y - (self.s_cell.height/4))))
 
-                elif not self.just_spawned and self.is_touching_wall(pixelCoord[0], pixelCoord[1]):
+                elif not self.won and not self.just_spawned and self.is_touching_wall(pixelCoord[0], pixelCoord[1]):
                     text = self.font.render("YOU DIED", True, WHITE)
+                    self.died = True
                     self.screen.blit(text, (100, 100))
 
                 elif not self.just_spawned and self.is_touching_end_cell(pixelCoord[0], pixelCoord[1]):
                     text = self.font.render("YOU WIN!", True, WHITE)
+                    self.won = True
                     self.screen.blit(text, (100, 100))
 
             # Draws the surface object to the screen.
@@ -195,6 +216,5 @@ class Game:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    g = Game(2)
+    g = Game(1)
     g.run()
-        

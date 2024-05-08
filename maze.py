@@ -53,9 +53,12 @@ class Maze:
                             self.maze_grid[row][col].set_is_end_cell(True)
 
         except FileNotFoundError as e:
-            print("An error occurred.")
+            print(f"Missing {filename}")
             print(e)
 
+    def return_start_cell(self):
+        return self.start_cell
+    
     def draw(self):
         for row in range(self.num_rows):
             for col in range(self.num_cols):
