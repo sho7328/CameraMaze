@@ -184,18 +184,26 @@ class Game:
                 self.screen.blit(self.player, (pixelCoord[0], pixelCoord[1]))
                 # pygame.draw.circle(self.background, (0, 255, 0), [pixelCoord[0], pixelCoord[1]], 5, 10)
             
-                if self.just_spawned and not self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
+                if (self.just_spawned or self.died) and not self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
+                    if self.died:
+                        dead_text = self.font.render("YOU DIED", True, WHITE)
+                        self.died = True
+                        self.screen.blit(dead_text, (100, 100))
                     text = self.font.render("Go to", True, WHITE)
                     self.screen.blit(text, ((self.s_cell.x, self.s_cell.y - (self.s_cell.height/2))))
                     text1 = self.font.render("start cell", True, WHITE)
                     self.screen.blit(text1, ((self.s_cell.x, self.s_cell.y - (self.s_cell.height/4))))
+                
+                elif self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
+                    if self.died:
+                        self.died = False
 
                 elif not self.won and not self.just_spawned and self.is_touching_wall(pixelCoord[0], pixelCoord[1]):
                     text = self.font.render("YOU DIED", True, WHITE)
                     self.died = True
                     self.screen.blit(text, (100, 100))
 
-                elif not self.just_spawned and self.is_touching_end_cell(pixelCoord[0], pixelCoord[1]):
+                elif (not self.died and not self.just_spawned) and self.is_touching_end_cell(pixelCoord[0], pixelCoord[1]):
                     text = self.font.render("YOU WIN!", True, WHITE)
                     self.won = True
                     self.screen.blit(text, (100, 100))
