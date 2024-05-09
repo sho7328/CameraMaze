@@ -1,4 +1,5 @@
-# Finger tracking mechanisms sampled from Finger Tracking Gaem Lab, the rest 90% coded by me and 10% ChatGPT
+# SOPHIE HO 5/8/2024
+# Finger tracking mechanisms sampled from Finger Tracking Gaem Lab, the rest 85% coded by me and 10% ChatGPT
 import cv2
 import mediapipe as mp
 from mediapipe import solutions
@@ -76,33 +77,6 @@ class Game:
         self.button_x = (SCREEN_WIDTH/2) - 100
         self.button_y = SCREEN_HEIGHT / 2
 
-    # # TAKEN FROM FINGER TRACKING GAME LAB
-    # def draw_landmarks_on_hand(self, image, detection_result):
-    #     """
-    #     Draws all the landmarks on the hand
-    #     Args:
-    #         image (Image): Image to draw on
-    #         detection_result (HandLandmarkerResult): HandLandmarker detection results
-    #     """
-    #     # Get a list of the landmarks
-    #     hand_landmarks_list = detection_result.hand_landmarks
-        
-    #     # Loop through the detected hands to visualize.
-    #     for idx in range(len(hand_landmarks_list)):
-    #         hand_landmarks = hand_landmarks_list[idx]
-
-    #         # Save the landmarks into a NormalizedLandmarkList
-    #         hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-    #         hand_landmarks_proto.landmark.extend([
-    #         landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in hand_landmarks
-    #         ])
-
-    #         # Draw the landmarks on the hand
-    #         DrawingUtil.draw_landmarks(image,
-    #                                    hand_landmarks_proto,
-    #                                    solutions.hands.HAND_CONNECTIONS,
-    #                                    solutions.drawing_styles.get_default_hand_landmarks_style(),
-    #                                    solutions.drawing_styles.get_default_hand_connections_style())
     # FROM FINGER TRACKING GAME
     def get_finger_position(self, image, detection_result):
         """
@@ -194,7 +168,7 @@ class Game:
         self.screen.blit(t3, (SCREEN_WIDTH/6, 300))
         t4 = self.font.render("Level 4 time: " + str(self.level4_time) + " secs", True, WHITE)
         self.screen.blit(t4, (SCREEN_WIDTH/6, 350))
-        hs = self.font.render("Fastest high score in all history: " + str(self.high_score) + " secs", True, WHITE)
+        hs = self.font.render("Your high score: " + str(self.high_score) + " secs", True, WHITE)
         self.screen.blit(hs, (SCREEN_WIDTH/6, 400))
 
     # Main method: run the whole Game

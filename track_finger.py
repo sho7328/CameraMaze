@@ -1,3 +1,9 @@
+# SOPHIE HO 5/8/2024
+# NOT A PART OF THE GAME.
+# ONLY USED TO BUILD A BASE OF THE GAME:
+# A PROOF USED TO TRACK FINGERS AND SHOW DOTS WHERE THE FINGER IS.
+# Much taken from finger tracking game, and then modified by me a bit. 
+
 import cv2
 import mediapipe as mp
 from mediapipe import solutions

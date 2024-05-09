@@ -1,5 +1,7 @@
-# get a white screen to show up
-# draw a green circle
+# NOT USED FOR THE GAME.
+# FIRST STEP OF MY PROVING PROCESS:
+# Get a white screen to show up using pygame
+# Draw a green circle
 
 import pygame
 
@@ -27,5 +29,3 @@ while running:
     
     # Draws the surface object to the screen.
     pygame.display.update()
-
-
