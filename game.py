@@ -53,7 +53,10 @@ class Game:
         self.start_time = None
         self.timer_started = False
         self.elapsed_time = 0
-        self.timer_font = pygame.font.Font(None, 36)
+        self.elapsed_time_when_won = None  # Updated to None
+
+        # high score
+        self.high_score = float('inf')
 
     def draw_landmarks_on_hand(self, image, detection_result):
         """
@@ -173,7 +176,13 @@ class Game:
             if self.timer_started:
                 current_time = time.time()
                 self.elapsed_time = int(current_time - self.start_time)
-                timer_text = self.timer_font.render(f"Time: {self.elapsed_time} s", True, WHITE)
+                if not self.won:
+                    timer_text = self.font.render(f"Time: {self.elapsed_time} s", True, WHITE)
+                else:
+                    if self.elapsed_time_when_won is not None:  # Check if timer is already frozen
+                        timer_text = self.font.render(f"Time: {self.elapsed_time_when_won} s", True, WHITE)  # Display stored elapsed time
+                    else:
+                        timer_text = self.font.render(f"Time: {self.elapsed_time} s", True, WHITE)
                 self.screen.blit(timer_text, (10, 10))  # Display timer at (10, 10)
 
             # Draw the hand landmarks
@@ -204,8 +213,12 @@ class Game:
                     self.screen.blit(text, (100, 100))
 
                 elif (not self.died and not self.just_spawned) and self.is_touching_end_cell(pixelCoord[0], pixelCoord[1]):
-                    text = self.font.render("YOU WIN!", True, WHITE)
                     self.won = True
+                    if self.elapsed_time_when_won is None:  # Store elapsed time if not already stored
+                        self.elapsed_time_when_won = self.elapsed_time
+                        if self.elapsed_time_when_won < self.high_score:
+                            self.high_score = self.elapsed_time_when_won
+                    text = self.font.render("YOU WIN!", True, WHITE)
                     self.screen.blit(text, (100, 100))
 
             # Draws the surface object to the screen.
