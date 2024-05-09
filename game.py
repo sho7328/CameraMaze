@@ -76,33 +76,33 @@ class Game:
         self.button_x = (SCREEN_WIDTH/2) - 100
         self.button_y = SCREEN_HEIGHT / 2
 
-    # TAKEN FROM FINGER TRACKING GAME LAB
-    def draw_landmarks_on_hand(self, image, detection_result):
-        """
-        Draws all the landmarks on the hand
-        Args:
-            image (Image): Image to draw on
-            detection_result (HandLandmarkerResult): HandLandmarker detection results
-        """
-        # Get a list of the landmarks
-        hand_landmarks_list = detection_result.hand_landmarks
+    # # TAKEN FROM FINGER TRACKING GAME LAB
+    # def draw_landmarks_on_hand(self, image, detection_result):
+    #     """
+    #     Draws all the landmarks on the hand
+    #     Args:
+    #         image (Image): Image to draw on
+    #         detection_result (HandLandmarkerResult): HandLandmarker detection results
+    #     """
+    #     # Get a list of the landmarks
+    #     hand_landmarks_list = detection_result.hand_landmarks
         
-        # Loop through the detected hands to visualize.
-        for idx in range(len(hand_landmarks_list)):
-            hand_landmarks = hand_landmarks_list[idx]
+    #     # Loop through the detected hands to visualize.
+    #     for idx in range(len(hand_landmarks_list)):
+    #         hand_landmarks = hand_landmarks_list[idx]
 
-            # Save the landmarks into a NormalizedLandmarkList
-            hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-            hand_landmarks_proto.landmark.extend([
-            landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in hand_landmarks
-            ])
+    #         # Save the landmarks into a NormalizedLandmarkList
+    #         hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
+    #         hand_landmarks_proto.landmark.extend([
+    #         landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in hand_landmarks
+    #         ])
 
-            # Draw the landmarks on the hand
-            DrawingUtil.draw_landmarks(image,
-                                       hand_landmarks_proto,
-                                       solutions.hands.HAND_CONNECTIONS,
-                                       solutions.drawing_styles.get_default_hand_landmarks_style(),
-                                       solutions.drawing_styles.get_default_hand_connections_style())
+    #         # Draw the landmarks on the hand
+    #         DrawingUtil.draw_landmarks(image,
+    #                                    hand_landmarks_proto,
+    #                                    solutions.hands.HAND_CONNECTIONS,
+    #                                    solutions.drawing_styles.get_default_hand_landmarks_style(),
+    #                                    solutions.drawing_styles.get_default_hand_connections_style())
     # FROM FINGER TRACKING GAME
     def get_finger_position(self, image, detection_result):
         """
@@ -225,11 +225,16 @@ class Game:
 
             # If not on instruction/title screen: (which means it's an actual game level)
             if not self.level == 0:
+                # Display what level it is
+                level = "LEVEL " + str(self.level)
+                level_text = pygame.font.Font(None, 80).render(level, True, WHITE)
+                self.screen.blit(level_text, (300, 10))
+
                 # Check whether to start the timer or not (start it when the player touches start_cell)
                 if not self.timer_started and self.just_spawned == False:
                     self.start_time = time.time()  # Start the timer
                     self.timer_started = True
-                # Update timer if started
+                # Update timer if started, and freeze the timer if the player has won that level
                 if self.timer_started:
                     current_time = time.time()
                     self.elapsed_time = int(current_time - self.start_time)
@@ -251,71 +256,86 @@ class Game:
                                 self.level4_time = self.elapsed_time_when_won
                         else:
                             timer_text = pygame.font.Font(None, 60).render(f"Time: {self.elapsed_time} s", True, RED)
-                    self.screen.blit(timer_text, (10, 10))  # Display timer at (10, 10)
-
-                level = "LEVEL " + str(self.level)
-                level_text = pygame.font.Font(None, 80).render(level, True, WHITE)
-                self.screen.blit(level_text, (300, 10))
-            
+                    self.screen.blit(timer_text, (10, 10))
+            # If it's level 0/the title screen, show title and instructions
             else:
                 self.display_title_instructions()
 
-            # Draw the hand landmarks
-            # self.draw_landmarks_on_hand(image, results)
+            # Get the finger position coords
             pixelCoord = self.get_finger_position(image, results)
 
+            # If the finger is visible within the camera and there are finger coordinates
             if pixelCoord:
+                # Draw the player at the finger coord
                 self.screen.blit(self.player, (pixelCoord[0], pixelCoord[1]))
-                # pygame.draw.circle(self.background, (0, 255, 0), [pixelCoord[0], pixelCoord[1]], 5, 10)
+
+                # If all the levels have been beat and the player pressed the see_stats button, show the stats
                 if self.game_over and self.is_touching_button(pixelCoord[0], pixelCoord[1]):
                     self.show_stats()
-                
+                # Otherwise if the game's not over yet
                 else:
-                    
-                    if not self.level == 0 and (self.just_spawned or self.died) and not self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
-                        if self.died:
+                    # If the level is a real game level
+                    if not self.level == 0:
+                        # If the player just spawned or just died and isn't touching the start cell
+                        if (self.just_spawned or self.died) and not self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
+                            if self.died:
+                                # If they just died, display "you died" until they touch the start cell
+                                dead_text = pygame.font.Font(None, 80).render("YOU DIED", True, WHITE)
+                                self.died = True
+                                self.screen.blit(dead_text, (300, 500))
+                            # Display "go to start cell" until they go to the start cell
+                            text = self.font.render("Go to", True, WHITE)
+                            self.screen.blit(text, ((self.s_cell.x, self.s_cell.y - (self.s_cell.height/2))))
+                            text1 = self.font.render("start cell", True, WHITE)
+                            self.screen.blit(text1, ((self.s_cell.x - 20, self.s_cell.y - (self.s_cell.height/4))))
+                            # Outline the start_cell cell
+                            pygame.draw.rect(self.screen, (255, 255, 255, 155), (self.s_cell.x, self.s_cell.y, self.s_cell.width, self.s_cell.height), 7)
+                        
+                        # If the player is touching the start cell they're not dead anymore
+                        elif self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
+                            if self.died:
+                                self.died = False
+                        
+                        # If someone didn't just spawn and they touched a wall they died
+                        elif not self.just_spawned and self.is_touching_wall(pixelCoord[0], pixelCoord[1]):
                             dead_text = pygame.font.Font(None, 80).render("YOU DIED", True, WHITE)
                             self.died = True
                             self.screen.blit(dead_text, (300, 500))
-                        text = self.font.render("Go to", True, WHITE)
-                        self.screen.blit(text, ((self.s_cell.x, self.s_cell.y - (self.s_cell.height/2))))
-                        text1 = self.font.render("start cell", True, WHITE)
-                        self.screen.blit(text1, ((self.s_cell.x - 20, self.s_cell.y - (self.s_cell.height/4))))
-                        pygame.draw.rect(self.screen, (255, 255, 255, 155), (self.s_cell.x, self.s_cell.y, self.s_cell.width, self.s_cell.height), 7)
-                    
-                    elif not self.level == 0 and self.is_touching_start_cell(pixelCoord[0], pixelCoord[1]):
-                        if self.died:
-                            self.died = False
 
-                    elif not self.level == 0 and not self.won and not self.just_spawned and self.is_touching_wall(pixelCoord[0], pixelCoord[1]):
-                        dead_text = pygame.font.Font(None, 80).render("YOU DIED", True, WHITE)
-                        self.died = True
-                        self.screen.blit(dead_text, (300, 500))
-
-                    elif not self.level == 0 and (not self.died and not self.just_spawned) and self.is_touching_end_cell(pixelCoord[0], pixelCoord[1]):
-                        self.won = True 
-                        if self.elapsed_time_when_won is None:  # Store elapsed time if not already stored
-                            self.elapsed_time_when_won = self.elapsed_time
-                            if self.elapsed_time_when_won < self.high_score:
-                                self.high_score = self.elapsed_time_when_won
-                        text = self.font.render("YOU WIN!", True, WHITE)
-                        self.screen.blit(text, (100, 100))
+                        # If the player is alive and touchign an end cell, display that they won
+                        elif (not self.died and not self.just_spawned) and self.is_touching_end_cell(pixelCoord[0], pixelCoord[1]):
+                            self.won = True 
+                            if self.elapsed_time_when_won is None:  # Store elapsed time if not already stored
+                                self.elapsed_time_when_won = self.elapsed_time
+                                # Check the high score for new records
+                                if self.elapsed_time_when_won < self.high_score:
+                                    self.high_score = self.elapsed_time_when_won
+                            text = self.font.render("YOU WIN!", True, WHITE)
+                            self.screen.blit(text, (100, 100))
                         
-                    if self.won and not self.level == NUM_LEVELS:
-                        text = pygame.font.Font(None, 80).render("YOU WIN!", True, WHITE)
-                        self.screen.blit(text, (350, 300))
-                        self.screen.blit(self.level_up, (self.button_x, self.button_y))
+                        # If you won adn there are more levels to go, show the next level button
+                        if self.won and not self.level == NUM_LEVELS:
+                            text = pygame.font.Font(None, 80).render("YOU WIN!", True, WHITE)
+                            self.screen.blit(text, (350, 300))
+                            self.screen.blit(self.level_up, (self.button_x, self.button_y))
 
-                    if self.won and self.level == NUM_LEVELS:
-                        self.game_over = True
-                    
-                    if self.game_over:
-                        self.screen.blit(self.see_stats, (self.button_x, self.button_y))
+                        # If you won and there are no more levels, the game is over
+                        if self.won and self.level == NUM_LEVELS:
+                            self.game_over = True
+                        
+                        # If the game is over, make the show_stats button
+                        if self.game_over:
+                            self.screen.blit(self.see_stats, (self.button_x, self.button_y))
 
+                    # If there are more levels to go and the player is touching the next level button
                     if not self.level == NUM_LEVELS and (self.won and self.is_touching_button(pixelCoord[0], pixelCoord[1])) or (self.level == 0 and self.is_touching_button(pixelCoord[0], pixelCoord[1])):
+                        # Increase level
                         self.level += 1
+                        # New maze for that level
                         self.maze = Maze(self.level)
+                        # New starting cell (it's a different maze)
                         self.s_cell = self.maze.return_start_cell()
+                        # Reset other variables
                         self.just_spawned = True
                         self.died = False
                         self.won = False
@@ -335,5 +355,6 @@ class Game:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
+    # Run the game
     g = Game()
     g.run()
